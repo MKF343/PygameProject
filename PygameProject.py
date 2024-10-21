@@ -1,5 +1,5 @@
 #Class: CSE 1321
-#Group Project by: Michael Kirtland
+#Group Project by: Michael Kirtland, insert name here, insert name here, insert name here
 import pygame,sys
 import random
 import time
@@ -18,12 +18,6 @@ crash = pygame.mixer.Sound("Slap.mp3")
 font = pygame.font.Font(None, 36)
 #time variables
 starttime = 0
-timesurvived = 0
-longesttime = 0
-#meteor variables
-meteors = []
-lastspawn = 0
-meteorspawnrate = 5000
 #method for meteors
 def spawnmeteor():
     spawn.play()
@@ -74,17 +68,8 @@ while True:
     clock.tick(60)
     #filling the screen
     screen.fill((0,0,0))
-    #timer and spawning meteors
+    #timer
     currenttime = pygame.time.get_ticks()
-
-        #Collision Check
-        if player.colliderect(meteor):
-            crash.play()
-            if timesurvived > longesttime:
-                longesttime = timesurvived
-            time.sleep(1)  #short pause for break
-            resetgame()
-
     timesurvived = font.render(f'Time: {timesurvived}s', False, (255,255,255))
     screen.blit(timesurvived, (0,0))
     #update screen
