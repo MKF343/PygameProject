@@ -20,13 +20,11 @@ gameover = pygame.mixer.Sound("gameover.mp3")
 wrongmole = pygame.mixer.Sound("wrongmole.mp3")
 loading = pygame.mixer.Sound("loading.mp3")
 
-# Colors
+#colors
 white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 green = (0, 255, 0)
-blue = (0, 0, 255)
-
 #game variables
 font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
@@ -76,22 +74,22 @@ def startgame():
 def drawgame():
     screen.fill(white)
 
-    # Draw timer
+    #draw timer
     elapsedtime = (pygame.time.get_ticks() - starttime) / 1000
     timeleft = max(0, timelimit - elapsedtime)
     timertext = font.render(f"Time: {int(timeleft)}S", True, black)
     screen.blit(timertext, (10, 10))
 
-    # Draw score
+    #draw score
     scoretext = font.render(f"Score: {score}", True, black)
     screen.blit(scoretext, (screenwidth - 110, 10))
 
-    # Draw moles
+    #draw moles
     for i, (x, y) in enumerate(molepositions):
         molecolor = realmolecolor if i == realmoleindex else fakemolecolor
         pygame.draw.circle(screen, molecolor, (x, y), moleradius)
 
-    # Check win or lose conditions
+    #check win or lose conditions
     if score >= targetscore:
         youwin.play()
         endgame("You Win!")
