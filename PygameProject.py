@@ -1,5 +1,5 @@
 #Class: CSE 1321
-#Group Project by: Michael Kirtland
+#Group Project by: Michael K, Julian H., Damon B., Kaliayh
 import pygame, sys, random, time
 
 pygame.init()
