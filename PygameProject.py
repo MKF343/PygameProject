@@ -1,82 +1,175 @@
 #Class: CSE 1321
-#Group Project by: Michael Kirtland, insert name here, insert name here, insert name here
-import pygame,sys
-import random
-import time
+#Group Project by: Michael Kirtland
+import pygame, sys, random, time
+
 pygame.init()
+
 #screen initialization
-screenwidth = 800
-screenheight = 800
-screen = pygame.display.set_mode((screenwidth,screenheight))
+screenwidth = 600
+screenheight = 400
+screen = pygame.display.set_mode((screenwidth, screenheight))
 clock = pygame.time.Clock()
-pygame.display.set_caption('Whack-a-mole')
-#initialization for sounds
+pygame.display.set_caption('Whack-a-Mole')
+
+#sound initialization
 pygame.mixer.init()
-spawn = pygame.mixer.Sound("spawning.mp3")
+
+youwin = pygame.mixer.Sound("youwin.mp3")
 crash = pygame.mixer.Sound("Slap.mp3")
-#Font
+gameover = pygame.mixer.Sound("gameover.mp3")
+wrongmole = pygame.mixer.Sound("wrongmole.mp3")
+loading = pygame.mixer.Sound("loading.mp3")
+
+# Colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+
+#game variables
 font = pygame.font.Font(None, 36)
-#time variables
+clock = pygame.time.Clock()
+timelimit = 10
+targetscore = 20
+score = 0
+gameactive = False
+
+#mole settings
+moleradius = 30
+realmolecolor = green
+fakemolecolor = red
+numfakemoles = 4
+
+#mole positions
+molepositions = [(random.randint(50, screenwidth - 50), random.randint(50, screenheight - 50)) for s in range(numfakemoles + 1)]
+molespeeds = [(random.choice([-3, 3]), random.choice([-3, 3])) for i in range(numfakemoles + 1)]
+realmoleindex = random.randint(0, numfakemoles)
+
+#button settings
+buttonwidth, buttonheight = 200, 80
+buttonx = screenwidth // 2 - buttonwidth // 2
+buttony = screenheight // 2 - buttonheight // 2
+buttonrect = pygame.Rect(buttonx, buttony, buttonwidth, buttonheight)
+
+#timer
 starttime = 0
-#method for meteors
-def spawnmeteor():
-    spawn.play()
-    side = random.choice(['top', 'bottom', 'left', 'right'])
 
-    if side == 'top':
-        x = random.randint(0, screenwidth)
-        y = 0
-        dx = random.uniform(-2, 2)
-        dy = random.uniform(1, 4)
-    elif side == 'bottom':
-        x = random.randint(0, screenwidth)
-        y = screenheight
-        dx = random.uniform(-2, 2)
-        dy = random.uniform(-1, -4)
-    elif side == 'left':
-        x = 0
-        y = random.randint(0, screenheight)
-        dx = random.uniform(1, 4)
-        dy = random.uniform(-2, 2)
-    elif side == 'right':
-        x = screenwidth
-        y = random.randint(0, screenheight)
-        dx = random.uniform(-1, -4)
-        dy = random.uniform(-2, 2)
 
-    size = random.randint(20, 60)
-    meteor = pygame.Rect(x, y, size, size)
-    return meteor, dx, dy
-#resetting the game method
-def resetgame():
-    global meteors, starttime, timesurvived, meteorspawnrate
-    meteors.clear()
-    player.x, player.y = screenwidth//2 - 40//2,screenheight//2 - 40//2
+#game functions
+def drawmenu():
+    screen.fill(white)
+    titletext = font.render("Whack-a-Mole", True, black)
+    screen.blit(titletext, (screenwidth // 2 - titletext.get_width() // 2, screenheight // 5))
+    pygame.draw.rect(screen, green, buttonrect)
+    buttontext = font.render("Start", True, white)
+    screen.blit(buttontext, (buttonx + buttonwidth // 2 - buttontext.get_width() // 2, buttony + buttonheight // 2 - buttontext.get_height() // 2))
+
+
+def startgame():
+    global gameactive, score, starttime
+    gameactive = True
+    score = 0
     starttime = pygame.time.get_ticks()
-    timesurvived = 0
-    meteorspawnrate = 5000
-#boolean variables
-status = "Off"
-busy = False
-#button click detection method
-def buttonclicked(pos, buttonrect):
-    return buttonrect.collidepoint(pos)
-#reset to start
-resetgame()
+
+
+def drawgame():
+    screen.fill(white)
+
+    # Draw timer
+    elapsedtime = (pygame.time.get_ticks() - starttime) / 1000
+    timeleft = max(0, timelimit - elapsedtime)
+    timertext = font.render(f"Time: {int(timeleft)}S", True, black)
+    screen.blit(timertext, (10, 10))
+
+    # Draw score
+    scoretext = font.render(f"Score: {score}", True, black)
+    screen.blit(scoretext, (screenwidth - 110, 10))
+
+    # Draw moles
+    for i, (x, y) in enumerate(molepositions):
+        molecolor = realmolecolor if i == realmoleindex else fakemolecolor
+        pygame.draw.circle(screen, molecolor, (x, y), moleradius)
+
+    # Check win or lose conditions
+    if score >= targetscore:
+        youwin.play()
+        endgame("You Win!")
+    elif timeleft <= 0:
+        gameover.play()
+        endgame("Time's Up! You Lose!")
+
+
+def endgame(message):
+    global gameactive
+    gameactive = False
+    screen.fill(white)
+    endtext = font.render(message, True, black)
+    screen.blit(endtext, (screenwidth // 2 - endtext.get_width() // 2, screenheight // 2 - endtext.get_height() // 2))
+    pygame.display.flip()
+    pygame.time.delay(3000)
+    resetgame()
+
+
+def resetgame():
+    global molepositions, molespeeds, realmoleindex
+    molepositions = [(random.randint(50, screenwidth - 50), random.randint(50, screenheight - 50)) for i in range(numfakemoles + 1)]
+    molespeeds = [(random.choice([-3, 3]), random.choice([-3, 3])) for i in range(numfakemoles + 1)]
+    realmoleindex = random.randint(0, numfakemoles)
+
+
+def updatemoles():
+    for i in range(numfakemoles + 1):
+        x, y = molepositions[i]
+        dx, dy = molespeeds[i]
+        #move mole
+        x += dx
+        y += dy
+        #bounce off walls
+        if x - moleradius < 0 or x + moleradius > screenwidth:
+            dx = -dx
+        if y - moleradius < 0 or y + moleradius > screenheight:
+            dy = -dy
+        molepositions[i] = (x, y)
+        molespeeds[i] = (dx, dy)
+
+
+def checkmoleclick(pos):
+    global score
+    for i, (x, y) in enumerate(molepositions):
+        distance = ((x - pos[0]) ** 2 + (y - pos[1]) ** 2) ** 0.5
+        if distance <= moleradius:
+            if i == realmoleindex:
+                crash.play()
+                score += 1
+            else:
+                wrongmole.play()
+                score = max(0, score - 1)
+            return
+
+
+#main loop
 while True:
     keys = pygame.key.get_pressed()
-    clock.tick(60)
-    #filling the screen
-    screen.fill((0,0,0))
-    #timer
-    currenttime = pygame.time.get_ticks()
-    timesurvived = font.render(f'Time: {timesurvived}s', False, (255,255,255))
-    screen.blit(timesurvived, (0,0))
-    #update screen
+    screen.fill(white)
+
+    if not gameactive:
+        drawmenu()
+    else:
+        drawgame()
+        updatemoles()
+
     pygame.display.flip()
-    #events
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
         if keys[pygame.K_ESCAPE]:
             sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if not gameactive and buttonrect.collidepoint(event.pos):
+                startgame()
+            elif gameactive:
+                checkmoleclick(event.pos)
+
+    clock.tick(60)
