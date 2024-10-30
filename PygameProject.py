@@ -25,6 +25,7 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 green = (0, 255, 0)
+
 #game variables
 font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
@@ -58,11 +59,14 @@ starttime = 0
 def drawmenu():
     screen.fill(white)
     titletext = font.render("Whack-a-Mole", True, black)
-    screen.blit(titletext, (screenwidth // 2 - titletext.get_width() // 2, screenheight // 5))
+    screen.blit(titletext, (screenwidth // 2 - titletext.get_width() // 2, screenheight // 6))
     pygame.draw.rect(screen, green, buttonrect)
     buttontext = font.render("Start", True, white)
     screen.blit(buttontext, (buttonx + buttonwidth // 2 - buttontext.get_width() // 2, buttony + buttonheight // 2 - buttontext.get_height() // 2))
-
+    descriptiontext = font.render("Click the green mole 20 times before time runs out!", True, black)
+    screen.blit(descriptiontext, (screenwidth //2 - 300, screenheight // 3.5))
+    descriptiontext = font.render("Make sure not to click the red balls", True, black)
+    screen.blit(descriptiontext, (screenwidth //2 - 200, screenheight // 1.5))
 
 def startgame():
     global gameactive, score, starttime
@@ -76,8 +80,8 @@ def drawgame():
 
     #draw timer
     elapsedtime = (pygame.time.get_ticks() - starttime) / 1000
-    timeleft = max(0, timelimit - elapsedtime)
-    timertext = font.render(f"Time: {int(timeleft)}S", True, black)
+    timeleft = timelimit - elapsedtime
+    timertext = font.render(f"Time: {int(timeleft)}s", True, black)
     screen.blit(timertext, (10, 10))
 
     #draw score
@@ -142,7 +146,7 @@ def checkmoleclick(pos):
                 score += 1
             else:
                 wrongmole.play()
-                score = max(0, score - 1)
+                score = (0, score - 1)
             return
 
 
