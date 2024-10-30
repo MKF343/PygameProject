@@ -63,7 +63,7 @@ def drawmenu():
     pygame.draw.rect(screen, green, buttonrect)
     buttontext = font.render("Start", True, white)
     screen.blit(buttontext, (buttonx + buttonwidth // 2 - buttontext.get_width() // 2, buttony + buttonheight // 2 - buttontext.get_height() // 2))
-    descriptiontext = font.render("Click the green mole 20 times before time runs out!", True, black)
+    descriptiontext = font.render(f"Click the green mole {targetscore} times before time runs out!", True, black)
     screen.blit(descriptiontext, (screenwidth //2 - 300, screenheight // 3.5))
     descriptiontext = font.render("Make sure not to click the red balls", True, black)
     screen.blit(descriptiontext, (screenwidth //2 - 200, screenheight // 1.5))
