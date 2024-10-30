@@ -30,7 +30,7 @@ green = (0, 255, 0)
 font = pygame.font.Font(None, 36)
 clock = pygame.time.Clock()
 timelimit = 10
-targetscore = 20
+targetscore = 10
 score = 0
 gameactive = False
 
@@ -83,6 +83,8 @@ def drawgame():
     timeleft = timelimit - elapsedtime
     timertext = font.render(f"Time: {int(timeleft)}s", True, black)
     screen.blit(timertext, (10, 10))
+    targettext = font.render(f"Target Score: {targetscore}", True, black)
+    screen.blit(targettext, (10, 40))
 
     #draw score
     scoretext = font.render(f"Score: {score}", True, black)
@@ -137,16 +139,22 @@ def updatemoles():
 
 
 def checkmoleclick(pos):
-    global score
+    global score, realmoleindex
     for i, (x, y) in enumerate(molepositions):
         distance = ((x - pos[0]) ** 2 + (y - pos[1]) ** 2) ** 0.5
         if distance <= moleradius:
             if i == realmoleindex:
                 crash.play()
                 score += 1
+                #select a new random target mole
+                new_index = random.randint(0, numfakemoles)
+                #ensure the new target is different from the current one
+                while new_index == realmoleindex:
+                    new_index = random.randint(0, numfakemoles)
+                realmoleindex = new_index
             else:
                 wrongmole.play()
-                score = (0, score - 1)
+                score = max(0, score - 1)
             return
 
 
@@ -170,6 +178,8 @@ while True:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if not gameactive and buttonrect.collidepoint(event.pos):
+                loading.play()
+                pygame.time.wait(3000)
                 startgame()
             elif gameactive:
                 checkmoleclick(event.pos)
