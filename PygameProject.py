@@ -141,8 +141,9 @@ def updatemoles():
 def checkmoleclick(pos):
     global score, realmoleindex
     for i, (x, y) in enumerate(molepositions):
-        distance = ((x - pos[0]) ** 2 + (y - pos[1]) ** 2) ** 0.5
-        if distance <= moleradius:
+        #creating a rect around the moles
+        molerect = pygame.Rect(x - moleradius, y - moleradius, moleradius * 2, moleradius * 2)
+        if molerect.collidepoint(pos): #checks if you have clicked within the boundaries of the circle
             if i == realmoleindex:
                 crash.play()
                 score += 1
