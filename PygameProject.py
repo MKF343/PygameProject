@@ -5,8 +5,8 @@ import pygame, sys, random, time
 pygame.init()
 
 #screen initialization
-screenwidth = 600
-screenheight = 400
+screenwidth = 1500
+screenheight = 700
 screen = pygame.display.set_mode((screenwidth, screenheight))
 clock = pygame.time.Clock()
 pygame.display.set_caption('Whack-a-Mole')
@@ -19,6 +19,7 @@ crash = pygame.mixer.Sound("Slap.mp3")
 gameover = pygame.mixer.Sound("gameover.mp3")
 wrongmole = pygame.mixer.Sound("wrongmole.mp3")
 loading = pygame.mixer.Sound("loading.mp3")
+bossmusic = pygame.mixer.Sound("bossmusic.mp3")
 
 #colors
 white = (255, 255, 255)
@@ -38,10 +39,10 @@ gameactive = False
 moleradius = 30
 realmolecolor = green
 fakemolecolor = red
-numfakemoles = 4
+numfakemoles = 40
 
 #mole positions
-molepositions = [(random.randint(50, screenwidth - 50), random.randint(50, screenheight - 50)) for s in range(numfakemoles + 1)]
+molepositions = [(random.randint(moleradius, screenwidth - moleradius), random.randint(moleradius, screenheight - moleradius)) for s in range(numfakemoles + 1)]
 molespeeds = [(random.choice([-3, 3]), random.choice([-3, 3])) for i in range(numfakemoles + 1)]
 realmoleindex = random.randint(0, numfakemoles)
 
@@ -71,6 +72,7 @@ def drawmenu():
 def startgame():
     global gameactive, score, starttime
     gameactive = True
+    bossmusic.play()
     score = 0
     starttime = pygame.time.get_ticks()
 
@@ -97,6 +99,8 @@ def drawgame():
 
     #check win or lose conditions
     if score >= targetscore:
+        if pygame.mixer.get_busy():
+            bossmusic.stop()
         youwin.play()
         endgame("You Win!")
     elif timeleft <= 0:
@@ -116,8 +120,8 @@ def endgame(message):
 
 
 def resetgame():
-    global molepositions, molespeeds, realmoleindex
-    molepositions = [(random.randint(50, screenwidth - 50), random.randint(50, screenheight - 50)) for i in range(numfakemoles + 1)]
+    global molepositions, molespeeds, realmoleindex, moleradius
+    molepositions = [(random.randint(moleradius, screenwidth - moleradius), random.randint(moleradius, screenheight - moleradius)) for i in range(numfakemoles + 1)]
     molespeeds = [(random.choice([-3, 3]), random.choice([-3, 3])) for i in range(numfakemoles + 1)]
     realmoleindex = random.randint(0, numfakemoles)
 
@@ -149,14 +153,14 @@ def checkmoleclick(pos):
                 score += 1
                 #select a new random target mole
                 new_index = random.randint(0, numfakemoles)
-                #ensure the new target is different from the current one
+                #makes sure the new target is actually new
                 while new_index == realmoleindex:
                     new_index = random.randint(0, numfakemoles)
                 realmoleindex = new_index
             else:
                 wrongmole.play()
                 score = max(0, score - 1)
-            return
+            return #makes sure it only checks the one mole
 
 
 #main loop
